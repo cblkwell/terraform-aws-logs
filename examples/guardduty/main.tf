@@ -84,7 +84,7 @@ data "aws_s3_bucket" "main" {
 
 # GuardDuty expects a folder to exist, otherwise it throws an error.
 resource "aws_s3_bucket_object" "guardduty" {
-  bucket = data.aws_s3_bucket.main.0.id
+  bucket = data.aws_s3_bucket.main.id
   acl    = "private"
   key    = "/"
   source = "/dev/null"
@@ -92,7 +92,7 @@ resource "aws_s3_bucket_object" "guardduty" {
 
 resource "aws_guardduty_publishing_destination" "main" {
   detector_id     = aws_guardduty_detector.main.id
-  destination_arn = format("%s%s", data.aws_s3_bucket.main.0.arn, "/")
+  destination_arn = format("%s%s", data.aws_s3_bucket.main.arn, "/")
   kms_key_arn     = aws_kms_key.guardduty.arn
   depends_on = [
     aws_s3_bucket_object.guardduty
