@@ -40,6 +40,24 @@ data "aws_partition" "current" {}
 data "aws_iam_policy_document" "key_policy" {
   policy_id = "key-consolepolicy"
   statement {
+    sid = "Enable IAM User Permissions"
+    actions = [
+      "kms:*"
+    ]
+    effect = "Allow"
+    principals {
+      type = "AWS"
+      identifiers = [
+        format(
+          "arn:%s:iam::%s:root",
+          data.aws_partition.current.partition,
+          data.aws_caller_identity.current.account_id
+        )
+      ]
+    }
+    resources = ["*"]
+  }
+  statement {
     sid = "Allow GuardDuty to use the key"
     actions = [
       "kms:GenerateDataKey"
