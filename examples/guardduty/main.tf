@@ -86,7 +86,11 @@ data "aws_s3_bucket" "main" {
 resource "aws_s3_bucket_object" "guardduty" {
   bucket = data.aws_s3_bucket.main.id
   acl    = "private"
-  key    = "/"
+  key = var.s3_bucket_prefix == "/" ? "/" : format("%s/", (
+    substr(var.s3_bucket_prefix, 0, 1) == "/" ?
+    substr(var.s3_bucket_prefix, 1, length(var.s3_bucket_prefix)) :
+    var.s3_bucket_prefix
+  ))
   source = "/dev/null"
 }
 
