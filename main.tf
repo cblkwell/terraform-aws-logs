@@ -352,43 +352,28 @@ data "aws_iam_policy_document" "main" {
   # GuardDuty bucket policies
   #
 
+  ## attempting to use minimum permissions from https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_exportfindings.html#guardduty_exportfindings-s3-policies
+
   statement {
-    sid    = "guardduty-logs-get-location"
-    effect = local.guardduty_effect
-    principals {
-      type        = "Service"
-      identifiers = ["guardduty.amazonaws.com"]
-    }
-    actions   = ["s3:GetBucketLocation"]
-    resources = [local.bucket_arn]
+    actions = [
+      "s3:GetBucketLocation",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${var.bucket}",
+    ]
   }
 
   statement {
-    sid    = "guardduty-bucket-delivery"
-    effect = local.guardduty_effect
-    principals {
-      type        = "Service"
-      identifiers = ["guardduty.amazonaws.com"]
-    }
-    actions = ["s3:PutObject"]
-    condition {
-      test     = "StringEquals"
-      variable = "s3:x-amz-acl"
-      values   = ["bucket-owner-full-control"]
-    }
-    resources = local.guardduty_resources
+    actions = [
+      "s3:PutObject",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${var.bucket}/${var.prefix}*",
+    ]
   }
 
-  statement {
-    sid    = "guardduty-permissions-check"
-    effect = local.guardduty_effect
-    principals {
-      type        = "Service"
-      identifiers = ["guardduty.amazonaws.com"]
-    }
-    actions   = ["s3:GetBucketAcl"]
-    resources = [local.bucket_arn]
-  }
 
   #
   # Enforce TLS requests only
