@@ -102,13 +102,11 @@ resource "aws_guardduty_detector" "main" {
 }
 
 data "aws_s3_bucket" "main" {
-  count  = length(module.aws_logs.aws_logs_bucket) > 0 ? 1 : 0
   bucket = module.aws_logs.aws_logs_bucket
 }
 
 # GuardDuty expects a folder to exist, otherwise it throws an error.
 resource "aws_s3_bucket_object" "guardduty" {
-  count  = length(module.aws_logs.aws_logs_bucket) > 0 && length(var.s3_bucket_prefix) > 0 ? 1 : 0
   bucket = data.aws_s3_bucket.main.0.id
   acl    = "private"
   key = var.s3_bucket_prefix == "/" ? "/" : format("%s/", (
@@ -120,7 +118,6 @@ resource "aws_s3_bucket_object" "guardduty" {
 }
 
 resource "aws_guardduty_publishing_destination" "main" {
-  count           = length(module.aws_logs.aws_logs_bucket) > 0 ? 1 : 0
   detector_id     = aws_guardduty_detector.main.id
   destination_arn = format("%s%s", data.aws_s3_bucket.main.0.arn, (length(var.s3_bucket_prefix) > 0 ? var.s3_bucket_prefix : "/"))
   kms_key_arn     = aws_kms_key.guardduty.arn
